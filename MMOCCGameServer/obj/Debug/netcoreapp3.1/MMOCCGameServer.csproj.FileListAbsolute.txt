@@ -1,0 +1,4 @@
+C:\Users\brand\Desktop\PersonalCoding\MMOCCGameServer\MMOCCGameServer\MMOCCGameServer\bin\Debug\netcoreapp3.1\MMOCCGameServer.exe
+C:\Users\brand\Desktop\PersonalCoding\MMOCCGameServer\MMOCCGameServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.csprojAssemblyReference.cache
+C:\Users\brand\Desktop\PersonalCoding\MMOCCGameServer\MMOCCGameServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.AssemblyInfoInputs.cache
+C:\Users\brand\Desktop\PersonalCoding\MMOCCGameServer\MMOCCGameServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.AssemblyInfo.cs
