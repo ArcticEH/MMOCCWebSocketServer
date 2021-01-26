@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using System.Text.Json;
 
 namespace MMOCCGameServer
 {
@@ -22,6 +23,11 @@ namespace MMOCCGameServer
         protected override void OnClose(CloseEventArgs e)
         {
             Server.RemovePlayerConnection(this.ID);
+        }
+
+        protected override void OnMessage(MessageEventArgs e)
+        {
+            
         }
     }
 }

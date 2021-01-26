@@ -11,9 +11,11 @@ namespace MMOCCGameServer
     {
         static List<Player> playerConnections = new List<Player>();
 
+        static List<Room> publicRooms = new List<Room>();
+
         static WebSocketServer webSocketServer;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // Create websocket server
             webSocketServer = new WebSocketServer(9000);
@@ -24,6 +26,9 @@ namespace MMOCCGameServer
             // Start the server 
             webSocketServer.Start();
             Console.WriteLine("Started server on port 9000");
+
+            // Create Public Rooms
+            publicRooms.Add(new Room("First Room", RoomType.Public));
 
             Console.ReadKey();
         }
