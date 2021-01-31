@@ -9,9 +9,9 @@ namespace MMOCCGameServer
 {
     public static class Server
     {
-        static List<Player> playerConnections = new List<Player>();
+        public static List<Player> playerConnections = new List<Player>();
 
-        static List<Room> publicRooms = new List<Room>();
+        public static List<Room> publicRooms = new List<Room>();
 
         static WebSocketServer webSocketServer;
 
@@ -28,14 +28,14 @@ namespace MMOCCGameServer
             Console.WriteLine("Started server on port 9000");
 
             // Create Public Rooms
-            publicRooms.Add(new Room("First Room", RoomType.Public));
+            publicRooms.Add(new Room("default", RoomType.Public));
 
             Console.ReadKey();
         }
 
-        public static void AddPlayerConnection(String id, String playerName)
+        public static void AddPlayerConnection(Player newPlayer)
         {
-            playerConnections.Add(new Player(playerName, id));
+            playerConnections.Add(newPlayer);
         }
 
         public static void RemovePlayerConnection(String id)

@@ -11,8 +11,8 @@ namespace MMOCCGameServer
     [Serializable]
     public enum MessageType
     {
-        ChatMessage,
-        MovementRequest
+        NewServerConnection,
+        Spawn
     }
 
     [Serializable]
@@ -33,35 +33,31 @@ namespace MMOCCGameServer
     [Serializable]
     public abstract class MessageData { }
 
+ 
     [Serializable]
-    public class ChatMessageData : MessageData
-    {
-        public float PlayerXLocation { get; set; }
-        public string ChatMessage { get; set; }
-
-        public ChatMessageData(float newPlayerXLocation, string newChatMessage)
-        {
-            PlayerXLocation = newPlayerXLocation;
-            ChatMessage = newChatMessage;
-        }
-
-        public ChatMessageData() { } // blank constructor for deserializer.
-    }
-
     public class MovementRequestData : MessageData { };
 
     /////////////////////// START OF CHAT WEBSOCKET ///////////////////////////////////
     public class ChatWebSocket : WebSocketBehavior
     {
-        public ChatWebSocket()
-        {
-  
-        }
+        public ChatWebSocket() { }
 
         protected override void OnOpen()
         {
-            Server.AddPlayerConnection(this.ID, "default");
-              
+            Player newPlayer = new Player(this.ID, "default", Server.playerConnections.Count + 1, "default", 0);
+            Server.playerConnections.Add(newPlayer); // add player to connected players list.
+            Server.publicRooms[0].playersInRoom.Add(newPlayer); // add player to default public room.
+            MessageContainer newMessageContainer = new MessageContainer(MessageType.NewServerConnection, JsonSerializer.Serialize(newPlayer));
+            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newMessageContainer)), this.ID);
+
+            // retrieve other player connections and send them to new client to spawn.
+
+            foreach (Player player in Server.publicRooms[0].playersInRoom)
+            {
+                MessageContainer newSpawnMessageContainer = new MessageContainer(MessageType.Spawn, JsonSerializer.Serialize(player));
+
+                Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newSpawnMessageContainer)), this.ID);
+            }
         }
 
         protected override void OnClose(CloseEventArgs e)
@@ -72,24 +68,22 @@ namespace MMOCCGameServer
         protected override void OnMessage(MessageEventArgs e)
         {
             Console.WriteLine(Encoding.UTF8.GetString(e.RawData));
-
             MessageDecoder(Encoding.UTF8.GetString(e.RawData));
         }
 
         ////////////// PART OF JSON STUFF //////////////////////////////////
         public void MessageDecoder(string message)
         {
-            JsonSerializerOptions options = new JsonSerializerOptions();
+            MessageContainer decodedMessage = (MessageContainer)JsonSerializer.Deserialize(message, typeof(MessageContainer), null);
 
-            MessageContainer decodedMessage = (MessageContainer)JsonSerializer.Deserialize(message, typeof(MessageContainer), options);
-
-            if (decodedMessage.MessageType == MessageType.ChatMessage) // Handle if Message is a Chat Message
+            if (decodedMessage.MessageType == MessageType.Spawn) // Handle if player spawned
             {
-                string newMessageContainerJSON = JsonSerializer.Serialize(decodedMessage);
+                foreach (Player player in Server.publicRooms[0].playersInRoom)
+                {
+                    MessageContainer newSpawnMessageContainer = new MessageContainer(MessageType.Spawn, decodedMessage.Data);
 
-                Console.WriteLine(newMessageContainerJSON);
-
-                Sessions.Broadcast(Encoding.UTF8.GetBytes(newMessageContainerJSON));
+                    Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newSpawnMessageContainer)), player.Id);
+                }
             }
         }
     }

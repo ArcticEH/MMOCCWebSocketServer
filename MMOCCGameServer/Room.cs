@@ -17,7 +17,7 @@ namespace MMOCCGameServer
     {
         public string RoomName { get; private set; }
         public RoomType RoomType { get; private set; }
-        private List<Player> playersInRoom = new List<Player>();
+        public List<Player> playersInRoom = new List<Player>();
 
         public Room(string roomName, RoomType roomType)
         {
