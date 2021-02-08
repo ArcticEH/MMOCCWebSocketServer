@@ -23,5 +23,10 @@ namespace MMOCCGameServer
         }
 
         public Player() { }
+
+        public void SetOnCell(int cellNumber)
+        {
+            OnCell = cellNumber;
+        }
     }
 }

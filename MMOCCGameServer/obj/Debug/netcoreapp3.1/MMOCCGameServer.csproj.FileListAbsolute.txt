@@ -12,8 +12,9 @@ C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\bin\Debug\netcoreap
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.csprojAssemblyReference.cache
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.AssemblyInfoInputs.cache
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.AssemblyInfo.cs
-C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.csproj.CoreCompileInputs.cache
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.csproj.CopyComplete
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.dll
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.pdb
 C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.genruntimeconfig.cache
+C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Spirks\Desktop\MMOCCWebSocketServer\MMOCCGameServer\obj\Debug\netcoreapp3.1\MMOCCGameServer.csproj.CoreCompileInputs.cache

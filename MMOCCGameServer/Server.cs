@@ -9,6 +9,8 @@ namespace MMOCCGameServer
 {
     public static class Server
     {
+        public static int issuePlayerNumber = 0;
+
         public static List<Player> playerConnections = new List<Player>();
 
         public static List<Room> publicRooms = new List<Room>();
@@ -41,6 +43,7 @@ namespace MMOCCGameServer
         public static void RemovePlayerConnection(String id)
         {
             playerConnections.Remove(playerConnections.Where(p => p.Id == id).FirstOrDefault());
+            publicRooms[0].playersInRoom.Remove(publicRooms[0].playersInRoom.Where(p => p.Id == id).FirstOrDefault());
         }
     }
 }
