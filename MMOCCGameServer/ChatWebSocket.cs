@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Newtonsoft;
+using System;
 
 namespace MMOCCGameServer
 {
@@ -41,51 +39,57 @@ namespace MMOCCGameServer
         protected override void OnMessage(MessageEventArgs e)
         {
             Console.WriteLine(Encoding.UTF8.GetString(e.RawData));
-            MessageDecoder(Encoding.UTF8.GetString(e.RawData));
+            string decodedString = Encoding.UTF8.GetString(e.RawData);
+            MessageDecoder(decodedString);
         }
 
         public void MessageDecoder(string message)
         {
             MessageContainer decodedMessage = JsonSerializer.Deserialize<MessageContainer>(message);
 
-            if (decodedMessage.MessageType == MessageType.Spawn) // Handle if player spawned
+            switch (decodedMessage.MessageType) // Handle if player spawned
             {
-                foreach (Player player in Server.publicRooms[0].playersInRoom)
-                {
-                    MessageContainer newSpawnMessageContainer = new MessageContainer(MessageType.Spawn, decodedMessage.Data);
-
-                    Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newSpawnMessageContainer)), player.Id);
-                }
-            }
-            else if (decodedMessage.MessageType == MessageType.Movement)
-            {
-                foreach (Player player in Server.publicRooms[0].playersInRoom)
-                {
-                    MovementData newMovementData = JsonSerializer.Deserialize<MovementData>(decodedMessage.Data);
-                    // Send to other players
-                    MessageContainer newMovementMessageContainer = new MessageContainer(MessageType.Movement, decodedMessage.Data);
-                    Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newMovementMessageContainer)), player.Id);
-                }
-            }
-            else if (decodedMessage.MessageType == MessageType.UpdateInformation)
-            {
-                Console.WriteLine(decodedMessage.Data);
-
-                PlayerInformation newData = Newtonsoft.Json.JsonConvert.DeserializeObject<PlayerInformation>(decodedMessage.Data);
-
-                Console.WriteLine("ATTEMPT TO CHANGE TO: " + newData.OnCell);
-
-                foreach(Player player in Server.publicRooms[0].playersInRoom)
-                {
-                    if (player.PlayerNumber == newData.PlayerNumber)
+                case MessageType.Spawn:
                     {
-                        Console.WriteLine("BEFORE: " + player.OnCell);
-                        player.SetOnCell(newData.OnCell);
-                        Console.WriteLine("AFTER " + player.OnCell);
-                    }
-                }
+                        foreach (Player player in Server.publicRooms[0].playersInRoom)
+                        {
+                            MessageContainer newSpawnMessageContainer = new MessageContainer(MessageType.Spawn, decodedMessage.Data);
 
-                
+                            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newSpawnMessageContainer)), player.Id);
+                        }
+
+                        break;
+                    }
+
+                case MessageType.Movement:
+                    {
+                        foreach (Player player in Server.publicRooms[0].playersInRoom)
+                        {
+                            MovementData newMovementData = JsonSerializer.Deserialize<MovementData>(decodedMessage.Data);
+                            // Send to other players
+                            MessageContainer newMovementMessageContainer = new MessageContainer(MessageType.Movement, decodedMessage.Data);
+                            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newMovementMessageContainer)), player.Id);
+                        }
+
+                        break;
+                    }
+
+                case MessageType.UpdateInformation:
+                    {
+                        Console.WriteLine(decodedMessage.Data);
+
+                        PlayerInformation newData = JsonSerializer.Deserialize<PlayerInformation>(decodedMessage.Data, null);
+
+                        foreach (Player player in Server.publicRooms[0].playersInRoom)
+                        {
+                            if (player.PlayerNumber == newData.PlayerNumber)
+                            {
+                                player.SetOnCell(newData.OnCell);
+                            }
+                        }
+
+                        break;
+                    }
             }
         }
     }
@@ -95,7 +99,6 @@ namespace MMOCCGameServer
     /////////////////////////// BEYOND HERE ARE MESSAGE TYPES AND CLASSES ///////////////////////////////
     
 
-    [Serializable]
     public enum MessageType
     {
         NewServerConnection,
@@ -104,7 +107,6 @@ namespace MMOCCGameServer
         UpdateInformation
     }
 
-    [Serializable]
     public class MessageContainer
     {
         public MessageType MessageType { get; set; }
@@ -119,11 +121,8 @@ namespace MMOCCGameServer
         public MessageContainer() { } // blank constructor for deserializer.
     }
 
-    [Serializable]
     public abstract class MessageData { }
 
-
-    [Serializable]
     public class MovementData : MessageData
     {
         public int playerNumber;
@@ -138,14 +137,14 @@ namespace MMOCCGameServer
         public MovementData() { }
     }
 
-    [Serializable]
-    public class PlayerInformation : MessageData
+    public class PlayerInformation
     {
-        public string PlayerName { get; private set; }
-        public int PlayerNumber { get; private set; }
-        public string Id { get; private set; }
-        public string InRoom { get; private set; }
-        public int OnCell { get; private set; }
+        
+        public string PlayerName { get; set; }
+        public int PlayerNumber { get; set; }
+        public string Id { get; set; }
+        public string InRoom { get; set; }
+        public int OnCell { get; set; }
 
         // getters & setters
 
@@ -169,6 +168,7 @@ namespace MMOCCGameServer
             PlayerNumber = newNumber;
         }
 
+        
         public PlayerInformation(string playerName, int playerNumber, string id, string inRoom, int onCell) // constructor
         {
             PlayerName = playerName;
@@ -178,7 +178,10 @@ namespace MMOCCGameServer
             OnCell = onCell;
         }
 
-        public PlayerInformation() { }
+        public PlayerInformation()
+        {
+
+        }
     }
 
 
