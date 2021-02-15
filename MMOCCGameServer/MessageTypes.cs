@@ -11,6 +11,7 @@ public enum MessageType
     NewServerConnection,
     NewSpawn,
     ExistingSpawn,
+    Despawn,
     Movement
 }
 
@@ -62,6 +63,12 @@ public class ExistingSpawnData
     public string Id;
     public int playerNumber;
     public int cellNumber;
+}
+
+[Serializable]
+public class DespawnData
+{
+    public string Id;
 }
 
 

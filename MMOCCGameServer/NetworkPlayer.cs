@@ -8,11 +8,13 @@ namespace MMOCCGameServer
     {
 
         public string PlayerName;
-        public int PlayerNumber;
+        public int PlayerNumber;  
         public string Id;
 
         // Room information
         public string Room;
+        
+       
 
     }
 }

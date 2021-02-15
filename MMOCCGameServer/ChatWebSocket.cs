@@ -54,7 +54,23 @@ namespace MMOCCGameServer
 
         protected override void OnClose(CloseEventArgs e)
         {
+            Console.WriteLine("Received close connection");
+
+            // Remove from server
             Server.RemovePlayerConnection(this.ID);
+
+            // Send player message to despawn
+            DespawnData despawnData = new DespawnData
+            {
+                Id = this.ID
+            };
+
+            MessageContainer messageContainer = new MessageContainer(MessageType.Despawn, JsonConvert.SerializeObject(despawnData));
+            byte[] despawnMessage = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
+            foreach(Player player in Server.playerConnections)
+            {
+                Sessions.SendTo(despawnMessage, player.Id);
+            }
         }
 
         protected override void OnMessage(MessageEventArgs e)
