@@ -2,33 +2,54 @@
 using WebSocketSharp;
 using WebSocketSharp.Server;
 using System.Text;
-using System.Text.Json;
 using System;
+using System.IO;
+//using System.Text.Json;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace MMOCCGameServer
 {
+
     public class ChatWebSocket : WebSocketBehavior
     {
+
+
         public ChatWebSocket() { }
 
         protected override void OnOpen()
         {
-            Player newPlayer = new Player(this.ID, "default", Server.issuePlayerNumber, "default", 0);
-            Server.issuePlayerNumber++;
-            Server.playerConnections.Add(newPlayer); // add player to connected players list.
-            
-            Server.publicRooms[0].playersInRoom.Add(newPlayer); // add player to default public room.
-            MessageContainer newMessageContainer = new MessageContainer(MessageType.NewServerConnection, JsonSerializer.Serialize(newPlayer));
-            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newMessageContainer)), this.ID);
+            Console.WriteLine($"Received new player connection - {ID}");
 
-            // retrieve other player connections and send them to new client to spawn.
-
-            foreach (Player player in Server.publicRooms[0].playersInRoom)
+            // Add player to connection
+            Player newPlayer = new Player
             {
-                MessageContainer newSpawnMessageContainer = new MessageContainer(MessageType.Spawn, JsonSerializer.Serialize(player));
+                playerName = "Hi",
+                PlayerNumber = ++Player.numberOfPlayers,
+                Id = this.ID,
+                Room = "1"
 
-                Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newSpawnMessageContainer)), this.ID);
-            }
+            };
+            Server.AddPlayerConnection(newPlayer);
+
+            // Send back them network player
+            NewServerConnectionData newServerConnectionData = new NewServerConnectionData
+            {
+                PlayerName = newPlayer.playerName,
+                PlayerNumber = newPlayer.PlayerNumber,
+                Id = newPlayer.Id,
+                Room = newPlayer.Room
+            };
+
+            //Create message container with serialized message
+            string messageData = JsonConvert.SerializeObject(newServerConnectionData);
+            MessageContainer messageContainer = new MessageContainer(MessageType.NewServerConnection, messageData);
+            string messageContainerString = JsonConvert.SerializeObject(messageContainer);
+            byte[] messageSendArray = Encoding.UTF8.GetBytes(messageContainerString);
+
+            //Send connection message back
+            Send(messageSendArray);
+
         }
 
         protected override void OnClose(CloseEventArgs e)
@@ -38,155 +59,68 @@ namespace MMOCCGameServer
 
         protected override void OnMessage(MessageEventArgs e)
         {
+            // Receive and decode message into message container
             Console.WriteLine(Encoding.UTF8.GetString(e.RawData));
-            string decodedString = Encoding.UTF8.GetString(e.RawData);
-            MessageDecoder(decodedString);
+            string json = Encoding.UTF8.GetString(e.RawData);
+            MessageContainer messageContainer = JsonConvert.DeserializeObject<MessageContainer>(json);
+            HandleMessage(messageContainer);
         }
 
-        public void MessageDecoder(string message)
+        public void HandleMessage(MessageContainer messageContainer)
         {
-            MessageContainer decodedMessage = JsonSerializer.Deserialize<MessageContainer>(message);
-
-            switch (decodedMessage.MessageType) // Handle if player spawned
+            switch(messageContainer.MessageType)
             {
-                case MessageType.Spawn:
+                case MessageType.NewSpawn:
+                    SpawnData spawnData = JsonConvert.DeserializeObject<SpawnData>(messageContainer.MessageData); ;
+
+                    // Verify the spawn data
+
+                    // Create new spawn message to send out
+                    byte[] byteArray = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
+
+                    // Send spawn message to all players
+                    foreach(Player player in Server.playerConnections)
                     {
-                        foreach (Player player in Server.publicRooms[0].playersInRoom)
-                        {
-                            MessageContainer newSpawnMessageContainer = new MessageContainer(MessageType.Spawn, decodedMessage.Data);
-
-                            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newSpawnMessageContainer)), player.Id);
-                        }
-
-                        break;
+                        // Send to all players in session. TODO: Change to room once rooms are a thing
+                        Sessions.SendTo(byteArray, player.Id);
                     }
+
+                    // Send all players in room to player who made request
+                    foreach(Player player in Server.playerConnections)
+                    {
+                        if (player.Id.Equals(spawnData.playerId)) { continue; }
+                        Console.WriteLine("sending out existing player to spawned player");
+                        ExistingSpawnData existingSpawnData = new ExistingSpawnData
+                        {
+                            Id = player.Id,
+                            cellNumber = player.cellNumber,
+                            playerNumber = player.PlayerNumber
+                        };
+                        MessageContainer mc = new MessageContainer(MessageType.ExistingSpawn, JsonConvert.SerializeObject(existingSpawnData));
+                        byte[] otherPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
+                        Sessions.SendTo(otherPlayerBytes, spawnData.playerId);
+                    }
+                    break;
 
                 case MessageType.Movement:
-                    {
-                        foreach (Player player in Server.publicRooms[0].playersInRoom)
-                        {
-                            MovementData newMovementData = JsonSerializer.Deserialize<MovementData>(decodedMessage.Data);
-                            // Send to other players
-                            MessageContainer newMovementMessageContainer = new MessageContainer(MessageType.Movement, decodedMessage.Data);
-                            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(newMovementMessageContainer)), player.Id);
-                        }
+                    // Find player to change destination cell
+                    MovementData movementData = JsonConvert.DeserializeObject<MovementData>(messageContainer.MessageData);
+                    Server.playerConnections.Where(playerConnection => playerConnection.Id.Equals(movementData.playerId)).FirstOrDefault().cellNumber = movementData.destinationCellNumber;
 
-                        break;
+                    // Tell all players in room to move
+                    Console.WriteLine("Sending out movement");
+                    foreach(Player player in Server.playerConnections)
+                    {                    
+                        Sessions.SendTo(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer)), player.Id);
                     }
-
-                case MessageType.UpdateInformation:
-                    {
-                        Console.WriteLine(decodedMessage.Data);
-
-                        PlayerInformation newData = JsonSerializer.Deserialize<PlayerInformation>(decodedMessage.Data, null);
-
-                        foreach (Player player in Server.publicRooms[0].playersInRoom)
-                        {
-                            if (player.PlayerNumber == newData.PlayerNumber)
-                            {
-                                player.SetOnCell(newData.OnCell);
-                            }
-                        }
-
-                        break;
-                    }
+                    break;
             }
+
+           
+
         }
+
     }
-
-
-
-    /////////////////////////// BEYOND HERE ARE MESSAGE TYPES AND CLASSES ///////////////////////////////
-    
-
-    public enum MessageType
-    {
-        NewServerConnection,
-        Spawn,
-        Movement,
-        UpdateInformation
-    }
-
-    public class MessageContainer
-    {
-        public MessageType MessageType { get; set; }
-        public string Data { get; set; }
-
-        public MessageContainer(MessageType newMessageType, string newData)
-        {
-            MessageType = newMessageType;
-            Data = newData;
-        }
-
-        public MessageContainer() { } // blank constructor for deserializer.
-    }
-
-    public abstract class MessageData { }
-
-    public class MovementData : MessageData
-    {
-        public int playerNumber;
-        public int destinationCellNumber;
-
-        public MovementData(int playerRequestingMovement, int destination)
-        {
-            playerNumber = playerRequestingMovement;
-            destinationCellNumber = destination;
-        }
-
-        public MovementData() { }
-    }
-
-    public class PlayerInformation
-    {
-        
-        public string PlayerName { get; set; }
-        public int PlayerNumber { get; set; }
-        public string Id { get; set; }
-        public string InRoom { get; set; }
-        public int OnCell { get; set; }
-
-        // getters & setters
-
-        public string GetPlayerName()
-        {
-            return PlayerName;
-        }
-
-        public int GetPlayerNumber()
-        {
-            return PlayerNumber;
-        }
-
-        public void SetPlayerName(string newName)
-        {
-            PlayerName = newName;
-        }
-
-        public void SetPlayerNumber(int newNumber)
-        {
-            PlayerNumber = newNumber;
-        }
-
-        
-        public PlayerInformation(string playerName, int playerNumber, string id, string inRoom, int onCell) // constructor
-        {
-            PlayerName = playerName;
-            PlayerNumber = playerNumber;
-            Id = id;
-            InRoom = inRoom;
-            OnCell = onCell;
-        }
-
-        public PlayerInformation()
-        {
-
-        }
-    }
-
-
-
-
 
 
 }

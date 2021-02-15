@@ -4,29 +4,26 @@ using System.Text;
 
 namespace MMOCCGameServer
 {
-    [Serializable]
     public class Player
     {
-        public string PlayerName { get; private set; }
-        public int PlayerNumber { get; private set; }
-        public string Id { get; private set; }
-        public string InRoom { get; private set; }
-        public int OnCell { get; private set; }
+        static public int numberOfPlayers = 0;
 
-        public Player(string id, string name, int number, string inRoom, int onCell)
-        {
-            this.PlayerName = name;
-            this.PlayerNumber = number;
-            this.Id = id;
-            InRoom = inRoom;
-            OnCell = onCell;
-        }
+        public string playerName;
+        public int PlayerNumber;
+        public string Id;
+        public int cellNumber = 0;
 
-        public Player() { }
+        // Room information
+        public string Room;
 
-        public void SetOnCell(int cellNumber)
-        {
-            OnCell = cellNumber;
-        }
+        //public Player(string playerName, int playerNumber, string id, string room)
+        //{
+        //    this.playerName = playerName;
+        //    PlayerNumber = playerNumber;
+        //    Id = id;
+        //    Room = room;
+
+
+        //}
     }
 }

@@ -15,7 +15,7 @@ namespace MMOCCGameServer
 
         public static List<Room> publicRooms = new List<Room>();
 
-        static WebSocketServer webSocketServer;
+        public static WebSocketServer webSocketServer;
 
         public static void Main(string[] args)
         {
