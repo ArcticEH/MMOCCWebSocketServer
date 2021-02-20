@@ -4,9 +4,12 @@ using WebSocketSharp.Server;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
+using System.Threading;
 
 namespace MMOCCGameServer
 {
+
     public static class Server
     {
         public static int issuePlayerNumber = 0;
@@ -16,6 +19,12 @@ namespace MMOCCGameServer
         public static List<Room> publicRooms = new List<Room>();
 
         public static WebSocketServer webSocketServer;
+
+        public static ChatWebSocket chatWebSocket;
+
+        public const int TICKS_PER_SEC = 1;
+
+        public const float MS_PER_TICK = 1000f / TICKS_PER_SEC;
 
         public static void Main(string[] args)
         {
@@ -32,7 +41,10 @@ namespace MMOCCGameServer
             // Create Public Rooms
             publicRooms.Add(new Room("default", RoomType.Public));
 
-            Console.ReadKey();
+            // Start the update loop
+            UpdateLoop();
+
+           // Console.ReadKey();
         }
 
         public static void AddPlayerConnection(Player newPlayer)
@@ -44,6 +56,51 @@ namespace MMOCCGameServer
         {
             playerConnections.Remove(playerConnections.Where(p => p.Id == id).FirstOrDefault());
             publicRooms[0].playersInRoom.Remove(publicRooms[0].playersInRoom.Where(p => p.Id == id).FirstOrDefault());
+        }
+
+        public static void UpdateLoop()
+        {
+            Console.WriteLine($"Update loop started on main thread. Running at {TICKS_PER_SEC} ticks per second.");
+            DateTime nextLoop = DateTime.Now;
+
+            while(true)
+            {
+                while(nextLoop <= DateTime.Now)
+                {
+                    UpdatePlayerPositions();
+                    nextLoop = nextLoop.AddMilliseconds(MS_PER_TICK);
+
+                    if (nextLoop > DateTime.Now)
+                    {
+                        Thread.Sleep(nextLoop - DateTime.Now);
+                    }
+                }
+            }
+        }
+
+        public static void UpdatePlayerPositions()
+        {
+            Console.WriteLine("Updating player positions");
+            webSocketServer.WebSocketServices.TryGetServiceHost("/Chat", out WebSocketServiceHost host);
+
+            foreach (Player playerToUpdate in playerConnections)
+            {
+                foreach(Player playerToSend in playerConnections)
+                {
+                    // Create data
+                    MovementData movementData = new MovementData
+                    {
+                        playerId = playerToUpdate.Id,
+                        cellNumber = 0,
+                        xPosition = 0,
+                        yPosition = 0
+                    };
+                    MessageContainer messageContainer = new MessageContainer(MessageType.Movement, JsonConvert.SerializeObject(movementData));
+
+                    chatWebSocket.SendMessage(playerToSend.Id, messageContainer);
+                }
+
+            }
         }
     }
 }

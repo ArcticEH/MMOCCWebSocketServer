@@ -11,7 +11,11 @@ namespace MMOCCGameServer
         public string playerName;
         public int PlayerNumber;
         public string Id;
+
+        // Position Info
         public int cellNumber = 0;
+        public float xPosition = 0;
+        public float yPosition = 0;
 
         // Room information
         public string Room;

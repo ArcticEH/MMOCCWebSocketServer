@@ -43,8 +43,9 @@ public class SpawnData
 public class MovementData
 {
     public string playerId;
-    public int destinationCellNumber;
-
+    public int cellNumber;
+    public float xPosition;
+    public float yPosition;
 }
 
 [Serializable]

@@ -14,11 +14,12 @@ namespace MMOCCGameServer
     public class ChatWebSocket : WebSocketBehavior
     {
 
-
         public ChatWebSocket() { }
 
         protected override void OnOpen()
         {
+            Server.chatWebSocket = this;
+
             Console.WriteLine($"Received new player connection - {ID}");
 
             // Add player to connection
@@ -121,7 +122,7 @@ namespace MMOCCGameServer
                 case MessageType.Movement:
                     // Find player to change destination cell
                     MovementData movementData = JsonConvert.DeserializeObject<MovementData>(messageContainer.MessageData);
-                    Server.playerConnections.Where(playerConnection => playerConnection.Id.Equals(movementData.playerId)).FirstOrDefault().cellNumber = movementData.destinationCellNumber;
+                    Server.playerConnections.Where(playerConnection => playerConnection.Id.Equals(movementData.playerId)).FirstOrDefault().cellNumber = movementData.cellNumber;
 
                     // Tell all players in room to move
                     Console.WriteLine("Sending out movement");
@@ -136,7 +137,14 @@ namespace MMOCCGameServer
 
         }
 
+        public void SendMessage(string id, MessageContainer messageContainer)
+        {
+            Sessions.SendTo(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer)), id);
+        }
+
     }
+
+
 
 
 }
