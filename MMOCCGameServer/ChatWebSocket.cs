@@ -119,17 +119,16 @@ namespace MMOCCGameServer
                     }
                     break;
 
-                case MessageType.Movement:
+                case MessageType.MovementDataRequest:
                     // Find player to change destination cell
-                    MovementData movementData = JsonConvert.DeserializeObject<MovementData>(messageContainer.MessageData);
-                    Server.playerConnections.Where(playerConnection => playerConnection.Id.Equals(movementData.playerId)).FirstOrDefault().cellNumber = movementData.cellNumber;
+                    MovementDataRequest movementDataRequest = JsonConvert.DeserializeObject<MovementDataRequest>(messageContainer.MessageData);
+                    Player playerMovement = Server.playerConnections.Where(playerConnection => playerConnection.Id.Equals(movementDataRequest.playerId)).FirstOrDefault();
 
-                    // Tell all players in room to move
-                    Console.WriteLine("Sending out movement");
-                    foreach(Player player in Server.playerConnections)
-                    {                    
-                        Sessions.SendTo(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer)), player.Id);
-                    }
+                    // Set new values
+                    playerMovement.cellNumber = movementDataRequest.cellNumberPath[^1];
+                    playerMovement.xPosition = movementDataRequest.cellPathXValues[^1];
+                    playerMovement.yPosition = movementDataRequest.cellPathYValues[^1];
+
                     break;
             }
 

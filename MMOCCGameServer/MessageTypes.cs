@@ -12,7 +12,8 @@ public enum MessageType
     NewSpawn,
     ExistingSpawn,
     Despawn,
-    Movement
+    MovementDataUpdate,
+    MovementDataRequest
 }
 
 // Message container is the actual object sent over the network
@@ -40,12 +41,21 @@ public class SpawnData
 
 
 [Serializable]
-public class MovementData
+public class MovementDataUpdate
 {
     public string playerId;
     public int cellNumber;
     public float xPosition;
     public float yPosition;
+}
+
+[Serializable]
+public class MovementDataRequest
+{
+    public string playerId;
+    public int[] cellNumberPath;
+    public int[] cellPathXValues;
+    public int[] cellPathYValues;
 }
 
 [Serializable]

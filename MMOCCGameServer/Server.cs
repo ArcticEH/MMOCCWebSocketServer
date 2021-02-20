@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Threading;
+using System.Numerics;
 
 namespace MMOCCGameServer
 {
@@ -22,7 +23,7 @@ namespace MMOCCGameServer
 
         public static ChatWebSocket chatWebSocket;
 
-        public const int TICKS_PER_SEC = 1;
+        public const int TICKS_PER_SEC = 30;
 
         public const float MS_PER_TICK = 1000f / TICKS_PER_SEC;
 
@@ -88,16 +89,17 @@ namespace MMOCCGameServer
                 foreach(Player playerToSend in playerConnections)
                 {
                     // Create data
-                    MovementData movementData = new MovementData
+                    MovementDataUpdate movementData = new MovementDataUpdate
                     {
                         playerId = playerToUpdate.Id,
-                        cellNumber = 0,
-                        xPosition = 0,
-                        yPosition = 0
+                        cellNumber = playerToUpdate.cellNumber,
+                        xPosition = playerToUpdate.xPosition,
+                        yPosition = playerToUpdate.yPosition
                     };
-                    MessageContainer messageContainer = new MessageContainer(MessageType.Movement, JsonConvert.SerializeObject(movementData));
+                    MessageContainer messageContainer = new MessageContainer(MessageType.MovementDataUpdate, JsonConvert.SerializeObject(movementData));
 
                     chatWebSocket.SendMessage(playerToSend.Id, messageContainer);
+                 
                 }
 
             }
