@@ -6,11 +6,18 @@ namespace MMOCCGameServer
 {
     public class Player
     {
+        // Static vars
         static public int numberOfPlayers = 0;
+        static public int movementSpeed = 20; // Must be a number divisible by 2 to know when to switch sorting layers
 
+        // Player Information
         public string playerName;
         public int PlayerNumber;
         public string Id;
+
+        // Room information
+        public Guid RoomId;
+
 
         // Position Info
         public int cellNumber = 0;
@@ -22,19 +29,5 @@ namespace MMOCCGameServer
         public Cell destinationCell;
         public Cell startingCell;
         public bool isMoving;
-
-
-        // Room information
-        public string Room;
-
-        //public Player(string playerName, int playerNumber, string id, string room)
-        //{
-        //    this.playerName = playerName;
-        //    PlayerNumber = playerNumber;
-        //    Id = id;
-        //    Room = room;
-
-
-        //}
     }
 }

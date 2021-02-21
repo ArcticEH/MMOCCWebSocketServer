@@ -14,10 +14,13 @@ namespace MMOCCGameServer
     public class ChatWebSocket : WebSocketBehavior
     {
 
-        public ChatWebSocket() { }
+        public ChatWebSocket() {
+
+        }
 
         protected override void OnOpen()
         {
+            // Give server reference to this websocket when it is created
             Server.chatWebSocket = this;
 
             Console.WriteLine($"Received new player connection - {ID}");
@@ -28,16 +31,24 @@ namespace MMOCCGameServer
                 playerName = "Hi",
                 PlayerNumber = ++Player.numberOfPlayers,
                 Id = this.ID,
-                Room = "1",
                 startingCell = new Cell()
                 {
-                    Number = 12,
+                    Number = 0,
                     X = 0,
                     Y = 28
-                }
+                },
+                destinationCell = new Cell()
+                {
+                    Number = 0,
+                    X = 0,
+                    Y = 28
+                },
+                cellNumber = 0
 
             };
+
             Server.AddPlayerConnection(newPlayer);
+            Server.AddPlayerToRoom(newPlayer.Id, Server.publicRooms[0].RoomId); // for now just automatically add to welcome room
 
             // Send back them network player
             NewServerConnectionData newServerConnectionData = new NewServerConnectionData
@@ -45,7 +56,7 @@ namespace MMOCCGameServer
                 PlayerName = newPlayer.playerName,
                 PlayerNumber = newPlayer.PlayerNumber,
                 Id = newPlayer.Id,
-                Room = newPlayer.Room
+                Room = newPlayer.RoomId.ToString()
             };
 
             //Create message container with serialized message
@@ -145,9 +156,6 @@ namespace MMOCCGameServer
 
                     break;
             }
-
-           
-
         }
 
         public void SendMessage(string id, MessageContainer messageContainer)
