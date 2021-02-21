@@ -14,10 +14,15 @@ namespace MMOCCGameServer
 
         // Position Info
         public int cellNumber = 0;
+        public int sortingCellNumber = 0;
         public float xPosition = 0;
         public float yPosition = 0;
         public float ticksInMovement = 0;
-        public Queue<int> cellPath;
+        public Queue<Cell> cellPath = new Queue<Cell>();
+        public Cell destinationCell;
+        public Cell startingCell;
+        public bool isMoving;
+
 
         // Room information
         public string Room;

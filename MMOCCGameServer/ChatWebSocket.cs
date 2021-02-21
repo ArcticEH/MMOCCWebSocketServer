@@ -28,7 +28,13 @@ namespace MMOCCGameServer
                 playerName = "Hi",
                 PlayerNumber = ++Player.numberOfPlayers,
                 Id = this.ID,
-                Room = "1"
+                Room = "1",
+                startingCell = new Cell()
+                {
+                    Number = 12,
+                    X = 0,
+                    Y = 28
+                }
 
             };
             Server.AddPlayerConnection(newPlayer);
@@ -125,9 +131,17 @@ namespace MMOCCGameServer
                     Player playerMovement = Server.playerConnections.Where(playerConnection => playerConnection.Id.Equals(movementDataRequest.playerId)).FirstOrDefault();
 
                     // Set new values
-                    playerMovement.cellNumber = movementDataRequest.cellNumberPath[^1];
-                    playerMovement.xPosition = movementDataRequest.cellPathXValues[^1];
-                    playerMovement.yPosition = movementDataRequest.cellPathYValues[^1];
+                    playerMovement.cellPath = new Queue<Cell>();
+
+                    for (int i = 0; i < movementDataRequest.cellNumberPath.Length; i++)
+                    {
+                        playerMovement.cellPath.Enqueue(new Cell()
+                        {
+                            Number = movementDataRequest.cellNumberPath[i],
+                            X = movementDataRequest.cellPathXValues[i],
+                            Y = movementDataRequest.cellPathYValues[i]
+                        });
+                    }
 
                     break;
             }

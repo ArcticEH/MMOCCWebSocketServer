@@ -86,20 +86,67 @@ namespace MMOCCGameServer
 
             foreach (Player playerToUpdate in playerConnections)
             {
-                foreach(Player playerToSend in playerConnections)
-                {
-                    // Create data
-                    MovementDataUpdate movementData = new MovementDataUpdate
-                    {
-                        playerId = playerToUpdate.Id,
-                        cellNumber = playerToUpdate.cellNumber,
-                        xPosition = playerToUpdate.xPosition,
-                        yPosition = playerToUpdate.yPosition
-                    };
-                    MessageContainer messageContainer = new MessageContainer(MessageType.MovementDataUpdate, JsonConvert.SerializeObject(movementData));
+                // Check if player is moving
+                if (playerToUpdate.cellPath.Count == 0 && !playerToUpdate.isMoving) { continue; }
 
-                    chatWebSocket.SendMessage(playerToSend.Id, messageContainer);
-                 
+                // Update position on server
+                Vector3 nextPosition;
+
+                if (playerToUpdate.ticksInMovement == 0)
+                {
+
+                    // Start moving to next cell
+                    playerToUpdate.isMoving = true;
+                    playerToUpdate.ticksInMovement++;
+                    playerToUpdate.destinationCell = playerToUpdate.cellPath.Dequeue();
+                    if (playerToUpdate.startingCell.Number == playerToUpdate.destinationCell.Number)
+                    {
+                        playerToUpdate.destinationCell = playerToUpdate.cellPath.Dequeue();
+                    }
+                    nextPosition = Vector3.Lerp(playerToUpdate.startingCell.ConvertToVector3(), playerToUpdate.destinationCell.ConvertToVector3(), playerToUpdate.ticksInMovement / 30f);
+                    playerToUpdate.cellNumber = playerToUpdate.destinationCell.Number;
+                }
+                else if (playerToUpdate.ticksInMovement > 0 && playerToUpdate.ticksInMovement < 30)
+                {
+                    // Continue moving to a cell
+                    playerToUpdate.ticksInMovement++;
+                    nextPosition = Vector3.Lerp(playerToUpdate.startingCell.ConvertToVector3(), playerToUpdate.destinationCell.ConvertToVector3(), playerToUpdate.ticksInMovement / 30f);
+
+                    // if halfway then switch cell number
+                    if (playerToUpdate.ticksInMovement == 15)
+                    {
+                        playerToUpdate.sortingCellNumber = playerToUpdate.destinationCell.Number;
+                    }
+                }
+                else
+                {
+                    // Finish moving to cell
+                    playerToUpdate.isMoving = false;
+                    nextPosition = Vector3.Lerp(playerToUpdate.startingCell.ConvertToVector3(), playerToUpdate.destinationCell.ConvertToVector3(), playerToUpdate.ticksInMovement / 30f);
+
+                    playerToUpdate.startingCell = playerToUpdate.destinationCell;
+                    playerToUpdate.ticksInMovement = 0;
+                }
+
+                // Set next values
+                playerToUpdate.xPosition = nextPosition.X;
+                playerToUpdate.yPosition = nextPosition.Y;
+
+                // Create data to send to all clients
+                MovementDataUpdate movementData = new MovementDataUpdate
+                {
+                    playerId = playerToUpdate.Id,
+                    cellNumber = playerToUpdate.cellNumber,
+                    xPosition = playerToUpdate.xPosition,
+                    yPosition = playerToUpdate.yPosition,
+                    sortingCellNumber = playerToUpdate.sortingCellNumber
+                };
+                MessageContainer messageContainer = new MessageContainer(MessageType.MovementDataUpdate, JsonConvert.SerializeObject(movementData));
+
+                // Send to all players in movement
+                foreach (Player playerToSend in playerConnections)
+                {
+                    chatWebSocket.SendMessage(playerToSend.Id, messageContainer);               
                 }
 
             }

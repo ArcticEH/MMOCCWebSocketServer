@@ -45,6 +45,7 @@ public class MovementDataUpdate
 {
     public string playerId;
     public int cellNumber;
+    public int sortingCellNumber;
     public float xPosition;
     public float yPosition;
 }
