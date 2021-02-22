@@ -79,24 +79,27 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\brand\\.nuget\\packages\\": {},
+    "C:\\Users\\Spirks\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\brand\\Desktop\\PersonalCoding\\MMOCCGameServer\\MMOCCGameServer\\MMOCCGameServer.csproj",
+      "projectUniqueName": "C:\\Users\\Spirks\\Desktop\\MMOCCWebSocketServer\\MMOCCGameServer\\MMOCCGameServer.csproj",
       "projectName": "MMOCCGameServer",
-      "projectPath": "C:\\Users\\brand\\Desktop\\PersonalCoding\\MMOCCGameServer\\MMOCCGameServer\\MMOCCGameServer.csproj",
-      "packagesPath": "C:\\Users\\brand\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\brand\\Desktop\\PersonalCoding\\MMOCCGameServer\\MMOCCGameServer\\obj\\",
+      "projectPath": "C:\\Users\\Spirks\\Desktop\\MMOCCWebSocketServer\\MMOCCGameServer\\MMOCCGameServer.csproj",
+      "packagesPath": "C:\\Users\\Spirks\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Spirks\\Desktop\\MMOCCWebSocketServer\\MMOCCGameServer\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\brand\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Spirks\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
@@ -143,7 +146,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.401\\RuntimeIdentifierGraph.json"
       }
     }
   }

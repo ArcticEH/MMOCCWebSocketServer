@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "4fprBleE4ab0V+k9Vd0PCiCeMUsbSixmBY2rHsLLBwyk4thScRlySsVXyHU0X2WQZ2QZHSoG6naKQFsWH0ccmw==",
+  "dgSpecHash": "gDX82bTpw2lAbn1aZHP47bijdYj515Dg6RZp9uYtr3l9aACzRmCe1547jwwXznaCxEpmDtR+EDy1sXZB9zLFvA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\brand\\Desktop\\PersonalCoding\\MMOCCGameServer\\MMOCCGameServer\\MMOCCGameServer.csproj",
+  "projectFilePath": "C:\\Users\\Spirks\\Desktop\\MMOCCWebSocketServer\\MMOCCGameServer\\MMOCCGameServer.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\brand\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
-    "C:\\Users\\brand\\.nuget\\packages\\websocketsharp-netstandard\\1.0.1\\websocketsharp-netstandard.1.0.1.nupkg.sha512"
+    "C:\\Users\\Spirks\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\Spirks\\.nuget\\packages\\websocketsharp-netstandard\\1.0.1\\websocketsharp-netstandard.1.0.1.nupkg.sha512"
   ],
   "logs": []
 }
