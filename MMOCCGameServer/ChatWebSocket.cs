@@ -46,8 +46,7 @@ namespace MMOCCGameServer
                 sortingCellNumber = 0,
                 cellNumber = 0,
                 xPosition = 0,
-                yPosition = 28
-
+                yPosition = 28,
             };
 
             Server.AddPlayerConnection(newPlayer);
@@ -131,7 +130,8 @@ namespace MMOCCGameServer
                             playerNumber = spawningPlayer.PlayerNumber,
                             xPosition = spawningPlayer.xPosition,
                             yPosition = spawningPlayer.yPosition,
-                            sortingCellNumber = spawningPlayer.sortingCellNumber
+                            sortingCellNumber = spawningPlayer.sortingCellNumber,
+                            facingDirection = spawningPlayer.facingDirection
                         };
                         MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
                         byte[] newPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
@@ -142,7 +142,7 @@ namespace MMOCCGameServer
                     foreach(Player player in room.playersInRoom)
                     {
                         if (player.Id.Equals(spawnData.playerId)) { continue; }
-                        Console.WriteLine("sending out existing player to spawned player");
+                        Console.WriteLine("sending out existing players to spawned player");
                         SpawnResponse existingSpawnData = new SpawnResponse
                         {
                             playerId = player.Id,
@@ -150,7 +150,8 @@ namespace MMOCCGameServer
                             playerNumber = player.PlayerNumber,
                             xPosition = player.xPosition,
                             yPosition = player.yPosition,
-                            sortingCellNumber = player.sortingCellNumber
+                            sortingCellNumber = player.sortingCellNumber, 
+                            facingDirection = player.facingDirection
                         };
                         MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
                         byte[] otherPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
@@ -172,7 +173,7 @@ namespace MMOCCGameServer
                         {
                             Number = movementDataRequest.cellNumberPath[i],
                             X = movementDataRequest.cellPathXValues[i],
-                            Y = movementDataRequest.cellPathYValues[i]
+                            Y = movementDataRequest.cellPathYValues[i],
                         });
                     }
                     break;

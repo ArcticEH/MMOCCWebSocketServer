@@ -24,6 +24,7 @@ namespace MMOCCGameServer
         public int sortingCellNumber = 0;
         public float xPosition = 0;
         public float yPosition = 0;
+        public FacingDirection facingDirection = FacingDirection.right;
         public float ticksInMovement = 0;
         public Queue<Cell> cellPath = new Queue<Cell>();
         public Cell destinationCell;

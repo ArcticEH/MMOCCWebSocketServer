@@ -45,22 +45,24 @@ namespace MMOCCGameServer
                 // Check if player is moving
                 if (playerToUpdate.cellPath.Count == 0 && !playerToUpdate.isMoving) { continue; }
 
+
                 // Update position on server
                 Vector3 nextPosition;
 
                 if (playerToUpdate.ticksInMovement == 0)
                 {
-
                     // Start moving to next cell
                     playerToUpdate.isMoving = true;
                     playerToUpdate.ticksInMovement++;
                     playerToUpdate.destinationCell = playerToUpdate.cellPath.Dequeue();
+
                     if (playerToUpdate.startingCell.Number == playerToUpdate.destinationCell.Number)
                     {
                         playerToUpdate.destinationCell = playerToUpdate.cellPath.Dequeue();
                     }
                     nextPosition = Vector3.Lerp(playerToUpdate.startingCell.ConvertToVector3(), playerToUpdate.destinationCell.ConvertToVector3(), playerToUpdate.ticksInMovement / Player.movementSpeed);
                     playerToUpdate.cellNumber = playerToUpdate.destinationCell.Number;
+
                 }
                 else if (playerToUpdate.ticksInMovement > 0 && playerToUpdate.ticksInMovement < Player.movementSpeed)
                 {
@@ -84,6 +86,9 @@ namespace MMOCCGameServer
                     playerToUpdate.ticksInMovement = 0;
                 }
 
+                // Calculate which direction the player is facing.
+                CalculatePlayerFacingDirection(playerToUpdate);
+
                 // Set next values
                 playerToUpdate.xPosition = nextPosition.X;
                 playerToUpdate.yPosition = nextPosition.Y;
@@ -95,7 +100,8 @@ namespace MMOCCGameServer
                     cellNumber = playerToUpdate.cellNumber,
                     xPosition = playerToUpdate.xPosition,
                     yPosition = playerToUpdate.yPosition,
-                    sortingCellNumber = playerToUpdate.sortingCellNumber
+                    sortingCellNumber = playerToUpdate.sortingCellNumber,
+                    facingDirection = playerToUpdate.facingDirection
                 };
                 MessageContainer messageContainer = new MessageContainer(MessageType.MovementDataUpdate, JsonConvert.SerializeObject(movementData));
 
@@ -105,6 +111,26 @@ namespace MMOCCGameServer
                     Server.chatWebSocket.SendMessage(playerToSend.Id, messageContainer);
                 }
 
+            }
+        }
+
+        private static void CalculatePlayerFacingDirection(Player playerToUpdate)
+        {
+            if ((playerToUpdate.xPosition > playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y > playerToUpdate.destinationCell.Y))
+            {
+                playerToUpdate.facingDirection = FacingDirection.left;
+            }
+            else if ((playerToUpdate.xPosition < playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y > playerToUpdate.destinationCell.Y))
+            {
+                playerToUpdate.facingDirection = FacingDirection.down;
+            }
+            else if ((playerToUpdate.xPosition > playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y < playerToUpdate.destinationCell.Y))
+            {
+                playerToUpdate.facingDirection = FacingDirection.up;
+            }
+            else if ((playerToUpdate.xPosition < playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y < playerToUpdate.destinationCell.Y))
+            {
+                playerToUpdate.facingDirection = FacingDirection.right;
             }
         }
     }
