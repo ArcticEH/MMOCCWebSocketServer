@@ -43,7 +43,10 @@ namespace MMOCCGameServer
                     X = 0,
                     Y = 28
                 },
-                cellNumber = 0
+                sortingCellNumber = 0,
+                cellNumber = 0,
+                xPosition = 0,
+                yPosition = 28
 
             };
 
@@ -104,33 +107,52 @@ namespace MMOCCGameServer
         {
             switch(messageContainer.MessageType)
             {
-                case MessageType.NewSpawn:
-                    SpawnData spawnData = JsonConvert.DeserializeObject<SpawnData>(messageContainer.MessageData); ;
+                case MessageType.SpawnRequest:
+                    SpawnRequest spawnData = JsonConvert.DeserializeObject<SpawnRequest>(messageContainer.MessageData); ;
 
                     // Verify the spawn data
 
                     // Create new spawn message to send out
                     byte[] byteArray = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
 
-                    // Send spawn message to all players
-                    foreach(Player player in Server.playerConnections)
+                    // Get room player is located in
+                    Player spawningPlayer = Server.playerConnections.Where(player => player.Id.Equals(spawnData.playerId)).First();
+
+                    Room room = Server.publicRooms.Where(room => room.RoomId.Equals(spawningPlayer.RoomId)).First();
+
+                    // Send spawn message to all players in room
+                    foreach(Player player in room.playersInRoom)
                     {
-                        // Send to all players in session. TODO: Change to room once rooms are a thing
-                        Sessions.SendTo(byteArray, player.Id);
+                        // Send to all players in room
+                        SpawnResponse existingSpawnData = new SpawnResponse
+                        {
+                            playerId = spawningPlayer.Id,
+                            cellNumber = spawningPlayer.cellNumber,
+                            playerNumber = spawningPlayer.PlayerNumber,
+                            xPosition = spawningPlayer.xPosition,
+                            yPosition = spawningPlayer.yPosition,
+                            sortingCellNumber = spawningPlayer.sortingCellNumber
+                        };
+                        MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
+                        byte[] newPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
+                        Sessions.SendTo(newPlayerBytes, player.Id);
                     }
 
                     // Send all players in room to player who made request
-                    foreach(Player player in Server.playerConnections)
+                    foreach(Player player in room.playersInRoom)
                     {
                         if (player.Id.Equals(spawnData.playerId)) { continue; }
                         Console.WriteLine("sending out existing player to spawned player");
-                        ExistingSpawnData existingSpawnData = new ExistingSpawnData
+                        SpawnResponse existingSpawnData = new SpawnResponse
                         {
-                            Id = player.Id,
+                            playerId = player.Id,
                             cellNumber = player.cellNumber,
-                            playerNumber = player.PlayerNumber
+                            playerNumber = player.PlayerNumber,
+                            xPosition = player.xPosition,
+                            yPosition = player.yPosition,
+                            sortingCellNumber = player.sortingCellNumber
                         };
-                        MessageContainer mc = new MessageContainer(MessageType.ExistingSpawn, JsonConvert.SerializeObject(existingSpawnData));
+                        MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
                         byte[] otherPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
                         Sessions.SendTo(otherPlayerBytes, spawnData.playerId);
                     }

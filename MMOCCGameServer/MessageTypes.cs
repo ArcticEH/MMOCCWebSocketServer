@@ -9,8 +9,8 @@ using System.Linq;
 public enum MessageType
 {
     NewServerConnection,
-    NewSpawn,
-    ExistingSpawn,
+    SpawnRequest,
+    SpawnResponse,
     Despawn,
     MovementDataUpdate,
     MovementDataRequest,
@@ -34,7 +34,7 @@ public class MessageContainer
 
 // Message Data Types
 [Serializable]
-public class SpawnData
+public class SpawnRequest
 {
     public string playerId;
     public int playerNumber;
@@ -71,11 +71,14 @@ public class NewServerConnectionData
 }
 
 [Serializable]
-public class ExistingSpawnData
+public class SpawnResponse
 {
-    public string Id;
+    public string playerId;
     public int playerNumber;
     public int cellNumber;
+    public int sortingCellNumber;
+    public float xPosition;
+    public float yPosition;
 }
 
 [Serializable]
@@ -91,7 +94,6 @@ public class InRoomChatMessageData
     public string roomName;
     public float messageXLocation;
 }
-
 
 
 
