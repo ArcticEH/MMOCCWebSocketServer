@@ -25,40 +25,21 @@ namespace MMOCCGameServer
 
             Console.WriteLine($"Received new player connection - {ID}");
 
-            // Add player to connection
+            // Add player with session information (not yet logged in)
             Player newPlayer = new Player
             {
-                playerName = "Hi",
                 PlayerNumber = ++Player.numberOfPlayers,
-                Id = this.ID,
-                startingCell = new Cell()
-                {
-                    Number = 0,
-                    X = 0,
-                    Y = 28
-                },
-                destinationCell = new Cell()
-                {
-                    Number = 0,
-                    X = 0,
-                    Y = 28
-                },
-                sortingCellNumber = 0,
-                cellNumber = 0,
-                xPosition = 0,
-                yPosition = 28,
+                Id = this.ID           
             };
 
             Server.AddPlayerConnection(newPlayer);
-            Server.AddPlayerToRoom(newPlayer.Id, Server.publicRooms[0].RoomId); // for now just automatically add to welcome room
+            //Server.AddPlayerToRoom(newPlayer.Id, Server.publicRooms[0].RoomId); // for now just automatically add to welcome room
 
             // Send back them network player
             NewServerConnectionData newServerConnectionData = new NewServerConnectionData
             {
-                PlayerName = newPlayer.playerName,
                 PlayerNumber = newPlayer.PlayerNumber,
                 Id = newPlayer.Id,
-                Room = newPlayer.RoomId.ToString()
             };
 
             //Create message container with serialized message
@@ -106,10 +87,43 @@ namespace MMOCCGameServer
         {
             switch(messageContainer.MessageType)
             {
+                case MessageType.Login:
+                    Login login = JsonConvert.DeserializeObject<Login>(messageContainer.MessageData);
+
+                    // TODO: Have actual login
+
+                    // Add player name to player
+                    Player loginPlayer = Server.playerConnections.Where(player => player.Id.Equals(login.playerId)).First();
+                    loginPlayer.playerName = login.PlayerName;
+
+                    // Create success message
+                    LoginResponse loginResponse = new LoginResponse()
+                    {
+                        isSuccess = true,
+                        message = "Successful login on server"
+                    };
+
+                    MessageContainer loginResponseMc = new MessageContainer(MessageType.LoginResponse, JsonConvert.SerializeObject(loginResponse));
+                    byte[] loginResponseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(loginResponseMc));
+                    Sessions.SendTo(loginResponseBytes, login.playerId);
+                    break;
+
                 case MessageType.SpawnRequest:
                     SpawnRequest spawnData = JsonConvert.DeserializeObject<SpawnRequest>(messageContainer.MessageData); ;
 
-                    // Verify the spawn data
+                    // Get player spawning and room
+                    Player spawnPlayer = Server.playerConnections.Where(player => player.Id.Equals(spawnData.playerId)).First();
+                    Room roomJoined = Server.publicRooms.Where(room => room.RoomId == spawnData.roomId).First();
+
+                    // Add properties for player position to be the rooms spawn position
+                    spawnPlayer.RoomId = spawnData.roomId;
+                    spawnPlayer.sortingCellNumber = roomJoined.SpawnCellNumber;
+                    spawnPlayer.startingCell = roomJoined.SpawnCell;
+                    spawnPlayer.xPosition = roomJoined.SpawnCell.X;
+                    spawnPlayer.yPosition = roomJoined.SpawnCell.Y;
+
+                    // Join room
+                    Server.AddPlayerToRoom(spawnData.playerId, spawnData.roomId);                    
 
                     // Create new spawn message to send out
                     byte[] byteArray = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
@@ -130,8 +144,7 @@ namespace MMOCCGameServer
                             playerNumber = spawningPlayer.PlayerNumber,
                             xPosition = spawningPlayer.xPosition,
                             yPosition = spawningPlayer.yPosition,
-                            sortingCellNumber = spawningPlayer.sortingCellNumber,
-                            facingDirection = spawningPlayer.facingDirection
+                            sortingCellNumber = spawningPlayer.sortingCellNumber
                         };
                         MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
                         byte[] newPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
@@ -142,7 +155,7 @@ namespace MMOCCGameServer
                     foreach(Player player in room.playersInRoom)
                     {
                         if (player.Id.Equals(spawnData.playerId)) { continue; }
-                        Console.WriteLine("sending out existing players to spawned player");
+                        Console.WriteLine("sending out existing player to spawned player");
                         SpawnResponse existingSpawnData = new SpawnResponse
                         {
                             playerId = player.Id,
@@ -150,8 +163,7 @@ namespace MMOCCGameServer
                             playerNumber = player.PlayerNumber,
                             xPosition = player.xPosition,
                             yPosition = player.yPosition,
-                            sortingCellNumber = player.sortingCellNumber, 
-                            facingDirection = player.facingDirection
+                            sortingCellNumber = player.sortingCellNumber
                         };
                         MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
                         byte[] otherPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
@@ -173,7 +185,7 @@ namespace MMOCCGameServer
                         {
                             Number = movementDataRequest.cellNumberPath[i],
                             X = movementDataRequest.cellPathXValues[i],
-                            Y = movementDataRequest.cellPathYValues[i],
+                            Y = movementDataRequest.cellPathYValues[i]
                         });
                     }
                     break;

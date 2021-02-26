@@ -9,21 +9,14 @@ using System.Linq;
 public enum MessageType
 {
     NewServerConnection,
+    Login,
+    LoginResponse,
     SpawnRequest,
     SpawnResponse,
     Despawn,
     MovementDataUpdate,
     MovementDataRequest,
     InRoomChatMessage
-}
-
-[Serializable]
-public enum FacingDirection
-{
-    left,
-    right,
-    up,
-    down
 }
 
 // Message container is the actual object sent over the network
@@ -43,10 +36,25 @@ public class MessageContainer
 
 // Message Data Types
 [Serializable]
+public class Login
+{
+    public string PlayerName;
+    public string playerId;
+}
+
+[Serializable]
+public class LoginResponse
+{
+    public bool isSuccess;
+    public string message;
+}
+
+[Serializable]
 public class SpawnRequest
 {
     public string playerId;
     public int playerNumber;
+    public int roomId;
 }
 
 
@@ -58,7 +66,6 @@ public class MovementDataUpdate
     public int sortingCellNumber;
     public float xPosition;
     public float yPosition;
-    public FacingDirection facingDirection;
 }
 
 [Serializable]
@@ -73,10 +80,8 @@ public class MovementDataRequest
 [Serializable]
 public class NewServerConnectionData
 {
-    public string PlayerName;
     public int PlayerNumber;
     public string Id;
-    public string Room;
 }
 
 [Serializable]
@@ -88,7 +93,6 @@ public class SpawnResponse
     public int sortingCellNumber;
     public float xPosition;
     public float yPosition;
-    public FacingDirection facingDirection;
 }
 
 [Serializable]

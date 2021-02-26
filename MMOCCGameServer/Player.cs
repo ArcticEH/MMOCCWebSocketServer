@@ -13,18 +13,19 @@ namespace MMOCCGameServer
         // Player Information
         public string playerName;
         public int PlayerNumber;
+
+        // Session Info
+        public bool isLoggedIn = false;
         public string Id;
 
         // Room information
-        public Guid RoomId;
-
+        public int RoomId;
 
         // Position Info
         public int cellNumber = 0;
         public int sortingCellNumber = 0;
         public float xPosition = 0;
         public float yPosition = 0;
-        public FacingDirection facingDirection = FacingDirection.right;
         public float ticksInMovement = 0;
         public Queue<Cell> cellPath = new Queue<Cell>();
         public Cell destinationCell;
