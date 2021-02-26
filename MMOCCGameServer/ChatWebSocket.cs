@@ -57,20 +57,29 @@ namespace MMOCCGameServer
         {
             Console.WriteLine("Received close connection");
 
+            Player player = Server.playerConnections.Where(player => player.Id.Equals(this.ID)).First();
+
             // Remove from server
             Server.RemovePlayerConnection(this.ID);
 
-            // Send player message to despawn
+            if (player.RoomId == -1) { return; } // For now just remove them
+
+            // Remove player from room
+            Room room = Server.publicRooms.Where(room => room.RoomId == player.RoomId).First();
+
+            room.playersInRoom.Remove(player);
+
+            // Create player message to despawn
             DespawnData despawnData = new DespawnData
             {
                 Id = this.ID
             };
 
-            MessageContainer messageContainer = new MessageContainer(MessageType.Despawn, JsonConvert.SerializeObject(despawnData));
+            MessageContainer messageContainer = new MessageContainer(MessageType.DespawnData, JsonConvert.SerializeObject(despawnData));
             byte[] despawnMessage = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
-            foreach(Player player in Server.playerConnections)
+            foreach(Player roomPlayer in room.playersInRoom)
             {
-                Sessions.SendTo(despawnMessage, player.Id);
+                Sessions.SendTo(despawnMessage, roomPlayer.Id);
             }
         }
 

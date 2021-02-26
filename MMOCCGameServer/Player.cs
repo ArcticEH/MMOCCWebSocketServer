@@ -19,7 +19,7 @@ namespace MMOCCGameServer
         public string Id;
 
         // Room information
-        public int RoomId;
+        public int RoomId; // -1 indicates no room
 
         // Position Info
         public int cellNumber = 0;

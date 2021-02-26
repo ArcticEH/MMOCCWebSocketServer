@@ -13,7 +13,8 @@ public enum MessageType
     LoginResponse,
     SpawnRequest,
     SpawnResponse,
-    Despawn,
+    DespawnRequest,
+    DespawnData,
     MovementDataUpdate,
     MovementDataRequest,
     InRoomChatMessage
@@ -104,6 +105,13 @@ public class SpawnResponse
     public float xPosition;
     public float yPosition;
     public FacingDirection facingDirection;
+}
+
+[Serializable]
+public class DespawnRequest
+{
+    public string Id;
+    public int RoomId;
 }
 
 [Serializable]
