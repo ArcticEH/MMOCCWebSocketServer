@@ -116,7 +116,7 @@ public class DespawnData
 public class InRoomChatMessageData
 {
     public string chatMessage;
-    public string roomName;
+    public int roomId;
     public float messageXLocation;
 }
 
