@@ -13,11 +13,13 @@ namespace MMOCCGameServer
         // Player Information
         public string playerName;
         public int PlayerNumber;
+
+        // Session Info
+        public bool isLoggedIn = false;
         public string Id;
 
         // Room information
-        public Guid RoomId;
-
+        public int RoomId;
 
         // Position Info
         public int cellNumber = 0;

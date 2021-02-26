@@ -20,16 +20,21 @@ namespace MMOCCGameServer
         public string RoomName { get; private set; }
         public RoomType RoomType { get; private set; }
 
-        public Guid RoomId { get; private set; }
+        public int RoomId { get; private set; }
 
         public List<Player> playersInRoom = new List<Player>();
         public List<Cell> cellsInRoom = new List<Cell>(); // Currently unused
 
-        public Room(string roomName, RoomType roomType)
+        // Hard coded room info
+        public Cell SpawnCell;
+        public int SpawnCellNumber;
+
+        public Room(string roomName, RoomType roomType, int roomId, Cell spawnCell)
         {
             RoomName = roomName;
             RoomType = roomType;
-            RoomId = new Guid();
+            RoomId = roomId;
+            SpawnCell = spawnCell;
         }
 
         public List<Player> GetPlayersInRoom()

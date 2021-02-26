@@ -40,7 +40,18 @@ namespace MMOCCGameServer
             Console.WriteLine("Started server on port 9000");
 
             // Create Public Rooms
-            publicRooms.Add(new Room("Welcome", RoomType.Public));
+            publicRooms.Add(new Room("Welcome", RoomType.Public, 1, new Cell()
+            {
+                Number = 0,
+                X = 0,
+                Y = 28
+            }));
+            publicRooms.Add(new Room("RoomTwo", RoomType.Public, 2, new Cell()
+            {
+                Number = 0,
+                X = 0,
+                Y = 28
+            }));
 
             // Start the update loop
             UpdateLoop();
@@ -53,7 +64,7 @@ namespace MMOCCGameServer
             playerConnections.Add(newPlayer);
         }
 
-        public static void AddPlayerToRoom(string playerId, Guid roomId)
+        public static void AddPlayerToRoom(string playerId, int roomId)
         {
             Room room = publicRooms.Where(room => room.RoomId.Equals(roomId)).First();
             Player player = playerConnections.Where(player => player.Id.Equals(playerId.ToString())).First();

@@ -9,6 +9,8 @@ using System.Linq;
 public enum MessageType
 {
     NewServerConnection,
+    Login,
+    LoginResponse,
     SpawnRequest,
     SpawnResponse,
     Despawn,
@@ -34,10 +36,25 @@ public class MessageContainer
 
 // Message Data Types
 [Serializable]
+public class Login
+{
+    public string PlayerName;
+    public string playerId;
+}
+
+[Serializable]
+public class LoginResponse
+{
+    public bool isSuccess;
+    public string message;
+}
+
+[Serializable]
 public class SpawnRequest
 {
     public string playerId;
     public int playerNumber;
+    public int roomId;
 }
 
 
@@ -63,11 +80,8 @@ public class MovementDataRequest
 [Serializable]
 public class NewServerConnectionData
 {
-    public string PlayerName;
     public int PlayerNumber;
     public string Id;
-    public string Room;
-
 }
 
 [Serializable]
