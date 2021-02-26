@@ -106,6 +106,7 @@ namespace MMOCCGameServer
                     MessageContainer loginResponseMc = new MessageContainer(MessageType.LoginResponse, JsonConvert.SerializeObject(loginResponse));
                     byte[] loginResponseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(loginResponseMc));
                     Sessions.SendTo(loginResponseBytes, login.playerId);
+                    Console.WriteLine($"Sending back login response to player {login.playerId}");
                     break;
 
                 case MessageType.SpawnRequest:
@@ -113,6 +114,8 @@ namespace MMOCCGameServer
 
                     // Get player spawning and room
                     Player spawnPlayer = Server.playerConnections.Where(player => player.Id.Equals(spawnData.playerId)).First();
+                    // Join room
+                    Server.AddPlayerToRoom(spawnData.playerId, spawnData.roomId);
                     Room roomJoined = Server.publicRooms.Where(room => room.RoomId == spawnData.roomId).First();
 
                     // Add properties for player position to be the rooms spawn position
@@ -122,8 +125,7 @@ namespace MMOCCGameServer
                     spawnPlayer.xPosition = roomJoined.SpawnCell.X;
                     spawnPlayer.yPosition = roomJoined.SpawnCell.Y;
 
-                    // Join room
-                    Server.AddPlayerToRoom(spawnData.playerId, spawnData.roomId);                    
+                                    
 
                     // Create new spawn message to send out
                     byte[] byteArray = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
