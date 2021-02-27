@@ -120,66 +120,20 @@ namespace MMOCCGameServer
 
                 case MessageType.SpawnRequest:
                     SpawnRequest spawnData = JsonConvert.DeserializeObject<SpawnRequest>(messageContainer.MessageData); ;
-
-                    // Get player spawning and room
-                    Player spawnPlayer = Server.playerConnections.Where(player => player.Id.Equals(spawnData.playerId)).First();
-                    // Join room
-                    Server.AddPlayerToRoom(spawnData.playerId, spawnData.roomId);
                     Room roomJoined = Server.publicRooms.Where(room => room.RoomId == spawnData.roomId).First();
+                    roomJoined.SpawnPlayerInRoom(spawnData.playerId);
 
-                    // Add properties for player position to be the rooms spawn position
-                    spawnPlayer.RoomId = spawnData.roomId;
-                    spawnPlayer.sortingCellNumber = roomJoined.SpawnCellNumber;
-                    spawnPlayer.startingCell = roomJoined.SpawnCell;
-                    spawnPlayer.xPosition = roomJoined.SpawnCell.X;
-                    spawnPlayer.yPosition = roomJoined.SpawnCell.Y;
+                    break;
 
-                                    
+                case MessageType.DespawnRequest:
+                    Console.WriteLine("Received despawn request");
+                    // Find player who is despawning/leaving room
+                    DespawnRequest despawnRequest = JsonConvert.DeserializeObject<DespawnRequest>(messageContainer.MessageData);
 
-                    // Create new spawn message to send out
-                    byte[] byteArray = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageContainer));
+                    // Find room they claim to be in
+                    Room occupiedRoom = Server.publicRooms.Where(room => room.RoomId.Equals(despawnRequest.RoomId)).First();
+                    occupiedRoom.DespawnPlayerInRoom(despawnRequest.Id);
 
-                    // Get room player is located in
-                    Player spawningPlayer = Server.playerConnections.Where(player => player.Id.Equals(spawnData.playerId)).First();
-
-                    Room room = Server.publicRooms.Where(room => room.RoomId.Equals(spawningPlayer.RoomId)).First();
-
-                    // Send spawn message to all players in room
-                    foreach(Player player in room.playersInRoom)
-                    {
-                        // Send to all players in room
-                        SpawnResponse existingSpawnData = new SpawnResponse
-                        {
-                            playerId = spawningPlayer.Id,
-                            cellNumber = spawningPlayer.cellNumber,
-                            playerNumber = spawningPlayer.PlayerNumber,
-                            xPosition = spawningPlayer.xPosition,
-                            yPosition = spawningPlayer.yPosition,
-                            sortingCellNumber = spawningPlayer.sortingCellNumber
-                        };
-                        MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
-                        byte[] newPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
-                        Sessions.SendTo(newPlayerBytes, player.Id);
-                    }
-
-                    // Send all players in room to player who made request
-                    foreach(Player player in room.playersInRoom)
-                    {
-                        if (player.Id.Equals(spawnData.playerId)) { continue; }
-                        Console.WriteLine("sending out existing player to spawned player");
-                        SpawnResponse existingSpawnData = new SpawnResponse
-                        {
-                            playerId = player.Id,
-                            cellNumber = player.cellNumber,
-                            playerNumber = player.PlayerNumber,
-                            xPosition = player.xPosition,
-                            yPosition = player.yPosition,
-                            sortingCellNumber = player.sortingCellNumber
-                        };
-                        MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
-                        byte[] otherPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
-                        Sessions.SendTo(otherPlayerBytes, spawnData.playerId);
-                    }
                     break;
 
                 case MessageType.MovementDataRequest:

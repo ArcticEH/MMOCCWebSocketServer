@@ -42,6 +42,88 @@ namespace MMOCCGameServer
             return playersInRoom;
         }
 
+        public void SpawnPlayerInRoom(string playerId)
+        {
+            // Get player from player connections
+            Player spawnPlayer = Server.playerConnections.Where(player => player.Id.Equals(playerId)).First();
+
+            // Set players attributes
+            spawnPlayer.RoomId = RoomId;
+            spawnPlayer.cellNumber = SpawnCellNumber;
+            spawnPlayer.startingCell = SpawnCell;
+            spawnPlayer.sortingCellNumber = SpawnCellNumber;
+            spawnPlayer.destinationCell = SpawnCell;
+            spawnPlayer.xPosition = SpawnCell.X;
+            spawnPlayer.yPosition = SpawnCell.Y;
+            spawnPlayer.cellPath.Clear();
+             
+            playersInRoom.Add(spawnPlayer);
+
+            // Send spawn message to all players in room
+            foreach (Player player in playersInRoom)
+            {
+                // Send to all players in room
+                SpawnResponse existingSpawnData = new SpawnResponse
+                {
+                    playerId = spawnPlayer.Id,
+                    cellNumber = spawnPlayer.cellNumber,
+                    playerNumber = spawnPlayer.PlayerNumber,
+                    xPosition = spawnPlayer.xPosition,
+                    yPosition = spawnPlayer.yPosition,
+                    sortingCellNumber = spawnPlayer.sortingCellNumber
+                };
+                MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
+                //byte[] newPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
+                Server.chatWebSocket.SendMessage(player.Id, mc);
+            }
+
+            // Send all players in room to player who made request
+            foreach (Player player in playersInRoom)
+            {
+                if (player.Id.Equals(playerId)) { continue; }
+                Console.WriteLine("sending out existing player to spawned player");
+                SpawnResponse existingSpawnData = new SpawnResponse
+                {
+                    playerId = player.Id,
+                    cellNumber = player.cellNumber,
+                    playerNumber = player.PlayerNumber,
+                    xPosition = player.xPosition,
+                    yPosition = player.yPosition,
+                    sortingCellNumber = player.sortingCellNumber
+                };
+                MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
+                //byte[] otherPlayerBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mc));
+                Server.chatWebSocket.SendMessage(spawnPlayer.Id, mc);
+            }
+        }
+
+        public void DespawnPlayerInRoom(string playerId) 
+        {
+            // Check if player is in room
+            Player player = playersInRoom.Where(player => player.Id.Equals(playerId)).First();
+            if (player is null) { return;  }
+
+            // Remove from room
+            player.RoomId = -1;
+            player.isMoving = false;
+            player.ticksInMovement = 0;
+            playersInRoom.Remove(player);
+
+            DespawnData despawnData = new DespawnData
+            {
+                Id = playerId
+            };
+
+            MessageContainer messageContainer = new MessageContainer(MessageType.DespawnData, JsonConvert.SerializeObject(despawnData));
+
+            // Send to all players in room to despawn
+            foreach(Player otherPlayer in playersInRoom)
+            {
+                Server.chatWebSocket.SendMessage(otherPlayer.Id, messageContainer);
+            }
+
+        }
+
 
         // Update all player positions in room
         public void UpdatePlayerPositions()
@@ -51,6 +133,8 @@ namespace MMOCCGameServer
                 // Check if player is moving
                 if (playerToUpdate.cellPath.Count == 0 && !playerToUpdate.isMoving) { continue; }
 
+                // Check if player room number is still this room
+                if (playerToUpdate.RoomId != RoomId) { continue;  }
 
                 // Update position on server
                 Vector3 nextPosition;

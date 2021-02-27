@@ -68,6 +68,13 @@ namespace MMOCCGameServer
         {
             Room room = publicRooms.Where(room => room.RoomId.Equals(roomId)).First();
             Player player = playerConnections.Where(player => player.Id.Equals(playerId.ToString())).First();
+
+            // Set player starting cell
+            player.cellNumber = room.SpawnCellNumber;
+            player.startingCell = room.SpawnCell;
+            player.sortingCellNumber = room.SpawnCellNumber;
+            player.destinationCell = room.SpawnCell;
+
             room.playersInRoom.Add(player);
             player.RoomId = room.RoomId;
         }
