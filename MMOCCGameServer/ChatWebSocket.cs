@@ -122,7 +122,6 @@ namespace MMOCCGameServer
                     SpawnRequest spawnData = JsonConvert.DeserializeObject<SpawnRequest>(messageContainer.MessageData); ;
                     Room roomJoined = Server.publicRooms.Where(room => room.RoomId == spawnData.roomId).First();
                     roomJoined.SpawnPlayerInRoom(spawnData.playerId);
-
                     break;
 
                 case MessageType.DespawnRequest:

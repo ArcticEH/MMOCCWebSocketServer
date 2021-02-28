@@ -66,6 +66,7 @@ namespace MMOCCGameServer
                 SpawnResponse existingSpawnData = new SpawnResponse
                 {
                     playerId = spawnPlayer.Id,
+                    playerName = spawnPlayer.playerName,
                     cellNumber = spawnPlayer.cellNumber,
                     playerNumber = spawnPlayer.PlayerNumber,
                     xPosition = spawnPlayer.xPosition,

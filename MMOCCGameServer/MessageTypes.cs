@@ -20,14 +20,7 @@ public enum MessageType
     InRoomChatMessage
 }
 
-[Serializable]
-public enum FacingDirection
-{
-    left,
-    right,
-    up,
-    down
-}
+
 
 // Message container is the actual object sent over the network
 [Serializable]
@@ -99,6 +92,7 @@ public class NewServerConnectionData
 public class SpawnResponse
 {
     public string playerId;
+    public string playerName;
     public int playerNumber;
     public int cellNumber;
     public int sortingCellNumber;
@@ -128,7 +122,14 @@ public class InRoomChatMessageData
     public float messageXLocation;
 }
 
-
-
+// Additional Enums
+[Serializable]
+public enum FacingDirection
+{
+    left,
+    right,
+    up,
+    down
+}
 
 
