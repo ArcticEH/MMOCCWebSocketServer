@@ -55,6 +55,7 @@ namespace MMOCCGameServer
             spawnPlayer.destinationCell = SpawnCell;
             spawnPlayer.xPosition = SpawnCell.X;
             spawnPlayer.yPosition = SpawnCell.Y;
+            spawnPlayer.facingDirection = FacingDirection.right;
             spawnPlayer.cellPath.Clear();
              
             playersInRoom.Add(spawnPlayer);
@@ -71,6 +72,7 @@ namespace MMOCCGameServer
                     playerNumber = spawnPlayer.PlayerNumber,
                     xPosition = spawnPlayer.xPosition,
                     yPosition = spawnPlayer.yPosition,
+                    facingDirection = spawnPlayer.facingDirection,
                     sortingCellNumber = spawnPlayer.sortingCellNumber
                 };
                 MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
@@ -91,6 +93,7 @@ namespace MMOCCGameServer
                     playerNumber = player.PlayerNumber,
                     xPosition = player.xPosition,
                     yPosition = player.yPosition,
+                    facingDirection = player.facingDirection,
                     sortingCellNumber = player.sortingCellNumber
                 };
                 MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
