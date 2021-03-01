@@ -69,7 +69,7 @@ public class MovementDataUpdate
     public int sortingCellNumber;
     public float xPosition;
     public float yPosition;
-    public FacingDirection facingDirection;
+    public PlayerState playerState;
 }
 
 [Serializable]
@@ -98,7 +98,7 @@ public class SpawnResponse
     public int sortingCellNumber;
     public float xPosition;
     public float yPosition;
-    public FacingDirection facingDirection;
+    public PlayerState playerState;
 }
 
 [Serializable]
@@ -124,12 +124,16 @@ public class InRoomChatMessageData
 
 // Additional Enums
 [Serializable]
-public enum FacingDirection
+public enum PlayerState
 {
-    left,
-    right,
-    up,
-    down
+    idleleft,
+    walkingleft,
+    idleup,
+    walkingup,
+    idleright,
+    walkingright,
+    idledown,
+    walkingdown
 }
 
 

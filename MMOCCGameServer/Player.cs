@@ -31,7 +31,7 @@ namespace MMOCCGameServer
         public Cell destinationCell;
         public Cell startingCell;
         public bool isMoving;
-        public FacingDirection facingDirection = FacingDirection.right;
+        public PlayerState playerState = PlayerState.idleright;
 
 
     }

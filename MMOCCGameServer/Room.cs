@@ -55,7 +55,7 @@ namespace MMOCCGameServer
             spawnPlayer.destinationCell = SpawnCell;
             spawnPlayer.xPosition = SpawnCell.X;
             spawnPlayer.yPosition = SpawnCell.Y;
-            spawnPlayer.facingDirection = FacingDirection.right;
+            spawnPlayer.playerState = PlayerState.idleright;
             spawnPlayer.cellPath.Clear();
              
             playersInRoom.Add(spawnPlayer);
@@ -72,7 +72,7 @@ namespace MMOCCGameServer
                     playerNumber = spawnPlayer.PlayerNumber,
                     xPosition = spawnPlayer.xPosition,
                     yPosition = spawnPlayer.yPosition,
-                    facingDirection = spawnPlayer.facingDirection,
+                    playerState = spawnPlayer.playerState,
                     sortingCellNumber = spawnPlayer.sortingCellNumber
                 };
                 MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
@@ -93,7 +93,7 @@ namespace MMOCCGameServer
                     playerNumber = player.PlayerNumber,
                     xPosition = player.xPosition,
                     yPosition = player.yPosition,
-                    facingDirection = player.facingDirection,
+                    playerState = player.playerState,
                     sortingCellNumber = player.sortingCellNumber
                 };
                 MessageContainer mc = new MessageContainer(MessageType.SpawnResponse, JsonConvert.SerializeObject(existingSpawnData));
@@ -157,7 +157,6 @@ namespace MMOCCGameServer
                     }
                     nextPosition = Vector3.Lerp(playerToUpdate.startingCell.ConvertToVector3(), playerToUpdate.destinationCell.ConvertToVector3(), playerToUpdate.ticksInMovement / Player.movementSpeed);
                     playerToUpdate.cellNumber = playerToUpdate.destinationCell.Number;
-
                 }
                 else if (playerToUpdate.ticksInMovement > 0 && playerToUpdate.ticksInMovement < Player.movementSpeed)
                 {
@@ -179,10 +178,33 @@ namespace MMOCCGameServer
 
                     playerToUpdate.startingCell = playerToUpdate.destinationCell;
                     playerToUpdate.ticksInMovement = 0;
+
+                    // logic for after player stopped moving
+                    if (playerToUpdate.cellPath.Count <= 0) 
+                    {
+                        Console.WriteLine(playerToUpdate.playerState);
+
+                        if (playerToUpdate.playerState == PlayerState.walkingright) // RIGHT
+                        {
+                            playerToUpdate.playerState = PlayerState.idleright;
+                        }
+                        else if (playerToUpdate.playerState == PlayerState.walkingup) // UP
+                        {
+                            playerToUpdate.playerState = PlayerState.idleup;
+                        }
+                        else if (playerToUpdate.playerState == PlayerState.walkingdown) // DOWN
+                        {
+                            playerToUpdate.playerState = PlayerState.idledown;
+                        }
+                        else if (playerToUpdate.playerState == PlayerState.walkingleft) // LEFT
+                        {
+                            playerToUpdate.playerState = PlayerState.idleleft;
+                        }
+                    }
                 }
 
-                // Calculate which direction the player is facing.
-                CalculatePlayerFacingDirection(playerToUpdate);
+                // Calculate which direction the player is walking
+                CalculatePlayerWalkingDirection(playerToUpdate);
 
                 // Set next values
                 playerToUpdate.xPosition = nextPosition.X;
@@ -196,7 +218,7 @@ namespace MMOCCGameServer
                     xPosition = playerToUpdate.xPosition,
                     yPosition = playerToUpdate.yPosition,
                     sortingCellNumber = playerToUpdate.sortingCellNumber,
-                    facingDirection = playerToUpdate.facingDirection
+                    playerState = playerToUpdate.playerState
                 };
                 MessageContainer messageContainer = new MessageContainer(MessageType.MovementDataUpdate, JsonConvert.SerializeObject(movementData));
 
@@ -209,23 +231,23 @@ namespace MMOCCGameServer
             }
         }
 
-        private static void CalculatePlayerFacingDirection(Player playerToUpdate)
+        private static void CalculatePlayerWalkingDirection(Player playerToUpdate)
         {
-            if ((playerToUpdate.xPosition > playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y > playerToUpdate.destinationCell.Y))
+            if ((playerToUpdate.xPosition > playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y > playerToUpdate.destinationCell.Y)) //  Walking Left
             {
-                playerToUpdate.facingDirection = FacingDirection.left;
+                playerToUpdate.playerState = PlayerState.walkingleft;
             }
-            else if ((playerToUpdate.xPosition < playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y > playerToUpdate.destinationCell.Y))
+            else if ((playerToUpdate.xPosition < playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y > playerToUpdate.destinationCell.Y)) // Walking down
             {
-                playerToUpdate.facingDirection = FacingDirection.down;
+                playerToUpdate.playerState = PlayerState.walkingdown;
             }
-            else if ((playerToUpdate.xPosition > playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y < playerToUpdate.destinationCell.Y))
+            else if ((playerToUpdate.xPosition > playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y < playerToUpdate.destinationCell.Y)) // Walking up
             {
-                playerToUpdate.facingDirection = FacingDirection.up;
+                playerToUpdate.playerState = PlayerState.walkingup;
             }
-            else if ((playerToUpdate.xPosition < playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y < playerToUpdate.destinationCell.Y))
+            else if ((playerToUpdate.xPosition < playerToUpdate.destinationCell.X) && (playerToUpdate.startingCell.Y < playerToUpdate.destinationCell.Y)) // Walking right
             {
-                playerToUpdate.facingDirection = FacingDirection.right;
+                playerToUpdate.playerState = PlayerState.walkingright;
             }
         }
     }

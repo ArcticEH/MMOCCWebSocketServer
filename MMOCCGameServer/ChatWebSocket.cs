@@ -153,18 +153,14 @@ namespace MMOCCGameServer
                         });
                     }
                     break;
-
                 case MessageType.InRoomChatMessage:
-
                     InRoomChatMessageData newInRoomChatMessageData = JsonConvert.DeserializeObject<InRoomChatMessageData>(messageContainer.MessageData);
-
                     Room RoomMessageDestination = Server.publicRooms.Where(Room => Room.RoomId == newInRoomChatMessageData.roomId).FirstOrDefault();
 
                     foreach(Player player in RoomMessageDestination.playersInRoom)
                     {
                         SendMessage(player.Id, messageContainer);
                     }
-
                     break;
             }
         }
